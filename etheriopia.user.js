@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Etheriopia - fix twitter.com crypto rendering
 // @namespace    Etheriopia
-// @version      0.0.2
+// @version      0.1.0
 // @description  Fix bugs with Twitter's rendering of cryptocurrencies
 // @author       a shadowy super coder
 // @license      GPL-3.0-or-later; https://www.gnu.org/licenses/gpl-3.0.txt
@@ -58,19 +58,19 @@
 
     const BTC_REPLACEMENT =
           `<a href="http://www.betontool.com/"><img class="BTC" src="${BTC_PNG}" height="24px" /></a>`;
+
     const REPLACEMENTS = [
         [
             "img[src*=Olympics_Countries_2021_ETH]",
             `<img class="Ethereum" src="${ETHEREUM_PNG}" width="24px" />🦇🔊`
         ],
         [
-            // "img[src*=Bitcoin_evergreen]",
-            "a[href^='/hashtag/Bitcoin']",
-            BTC_REPLACEMENT
-        ],
-        [
-            "a[href^='/hashtag/BTC']",
-            BTC_REPLACEMENT
+            "img[src*=Bitcoin_evergreen]",
+            (matches) => {
+                let links = jQuery(matches).parent();
+                // debug("BTC", links);
+                replace_matches(links, BTC_REPLACEMENT);
+            }
         ],
     ];
 
@@ -87,8 +87,12 @@
         console.log(PREFIX, ...args);
     }
 
-    function replace_css_elements(query, replacement) {
-        let matches = jQuery(query);
+    function replace_with_selector(selector, replacement) {
+        let matches = jQuery(selector);
+        replace_matches(matches, replacement);
+    }
+
+    function replace_matches(matches, replacement) {
         // debug(`replacing ${query}`, matches);
         if (matches && matches.each) {
             matches.each((i, elt) => {
@@ -106,14 +110,20 @@
     function init() {
         GM_addStyle(CSS);
 
-        for (let [selector, replacement] of REPLACEMENTS) {
+        for (let [selector, replacer] of REPLACEMENTS) {
             waitForKeyElements(
                 selector,
                 () => {
                     debug("waitForKeyElements triggered for", selector);
                     let last = lastWaited[selector];
                     if (!last || (new Date() - last > DEBOUNCE_MS)) {
-                        replace_css_elements(selector, replacement);
+                        if (typeof(replacer) === "string") {
+                            replace_with_selector(selector, replacer);
+                        }
+                        else {
+                            let matches = jQuery(selector);
+                            replacer(matches);
+                        }
                         lastWaited[selector] = new Date();
                     }
                     else {
