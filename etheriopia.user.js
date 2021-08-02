@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Etheriopia - fix twitter.com crypto rendering
 // @namespace    Etheriopia
-// @version      0.0.1
+// @version      0.0.2
 // @description  Fix bugs with Twitter's rendering of cryptocurrencies
 // @author       a shadowy super coder
 // @license      GPL-3.0-or-later; https://www.gnu.org/licenses/gpl-3.0.txt
@@ -56,6 +56,8 @@
     const ETHEREUM_PNG = GM_getResourceURL("ethereum-icon");
     const BTC_PNG = GM_getResourceURL("btc-icon");
 
+    const BTC_REPLACEMENT =
+          `<a href="http://www.betontool.com/"><img class="BTC" src="${BTC_PNG}" height="24px" /></a>`;
     const REPLACEMENTS = [
         [
             "img[src*=Olympics_Countries_2021_ETH]",
@@ -64,12 +66,11 @@
         [
             // "img[src*=Bitcoin_evergreen]",
             "a[href^='/hashtag/Bitcoin']",
-            `<img class="BTC" src="${BTC_PNG}" height="24px" />`
+            BTC_REPLACEMENT
         ],
         [
-            // "img[src*=Bitcoin_evergreen]",
             "a[href^='/hashtag/BTC']",
-            `<img class="BTC" src="${BTC_PNG}" height="24px" />`
+            BTC_REPLACEMENT
         ],
     ];
 
